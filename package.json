@@ -2,7 +2,7 @@
   "name": "gindex",
   "version": "0.0.9",
   "description": "Auto index.ts and public_api.ts generator",
-  "main": "gindex.js",
+  "main": "bin/gindex.js",
   "dependencies": {
     "@brandless/tsutility": "^0.1.11103",
     "tslib": "^2.3.0"
