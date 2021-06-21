@@ -1,0 +1,26 @@
+{
+  "name": "gindex",
+  "version": "0.0.9",
+  "description": "Auto index.ts and public_api.ts generator",
+  "main": "gindex.js",
+  "dependencies": {
+    "@brandless/tsutility": "^0.1.11103",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshcomley/gindex.git"
+  },
+  "author": "Josh Comley",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshcomley/gindex/issues"
+  },
+  "homepage": "https://github.com/joshcomley/gindex#readme"
+}
