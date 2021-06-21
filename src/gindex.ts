@@ -4,8 +4,8 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Enumerable, StringUtil, StringBuilder } from "@brandless/tsutility";
 import { cwd } from "process";
-const fs = require('fs')
-const path = require('path');
+import * as fs from "fs";
+import * as path from "path";
 
 class Path {
     public static DirectorySeparatorChar = '\\';
@@ -61,8 +61,8 @@ class File {
     public static Exists(name: string): boolean {
         return fs.existsSync(name);
     }
-    public static Delete(name: string): boolean {
-        return fs.unlinkSync(name);
+    public static Delete(name: string): void {
+        fs.unlinkSync(name);
     }
     public static ReadAllText(name: string): string {
         return fs.readFileSync(name, "utf-8");

@@ -5,8 +5,8 @@ import { __awaiter } from "tslib";
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Enumerable, StringUtil, StringBuilder } from "@brandless/tsutility";
 import { cwd } from "process";
-const fs = require('fs');
-const path = require('path');
+import * as fs from "fs";
+import * as path from "path";
 class Path {
     static GetDirectoryName(name) {
         return path.dirname(name);
@@ -61,7 +61,7 @@ class File {
         return fs.existsSync(name);
     }
     static Delete(name) {
-        return fs.unlinkSync(name);
+        fs.unlinkSync(name);
     }
     static ReadAllText(name) {
         return fs.readFileSync(name, "utf-8");
