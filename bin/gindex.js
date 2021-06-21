@@ -318,8 +318,11 @@ export var ExportItemKind;
 })(ExportItemKind || (ExportItemKind = {}));
 const args = process.argv.slice(2);
 let dir = args.length > 0 ? args[0] : cwd();
-// dir = `D:\\Code\\awsm\\Titan\\feature\\Frontend\\src\\projects\\packages`;
+if (!path.isAbsolute(dir)) {
+    dir = path.join(cwd(), dir);
+}
 const exporter = new Exporter();
+console.log(dir);
 exporter.ParseAsync(dir).then(() => {
     // for (const ex of exporter.Exports) {
     //     console.log("Folder: " + ex.Folder);
@@ -327,7 +330,7 @@ exporter.ParseAsync(dir).then(() => {
     //         console.log("Export: " + c.Path + " - " + c.Kind);
     //     }
     // }
-    // exporter.WriteAsync().then(() => {
-    //     console.log("Done");
-    // });
+    exporter.WriteAsync().then(() => {
+        console.log("Done");
+    });
 });
