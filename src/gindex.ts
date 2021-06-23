@@ -281,7 +281,7 @@ export class Export {
                 indexTs.AppendLine((<string>(this.ToExports(Enumerable.Select(files, _ => _.Path), true))));
             }
             let contents = (<string>((<string>(indexTs.toString())).trim()));
-            return (<string>(contents));
+            return (<string>(`${contents}"\n"`));
         }
         return (<string>(null));
     }
