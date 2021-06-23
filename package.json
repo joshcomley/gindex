@@ -1,6 +1,6 @@
 {
   "name": "gindex",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Auto index.ts and public_api.ts generator",
   "main": "bin/gindex.js",
   "type": "module",
