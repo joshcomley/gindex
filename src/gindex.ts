@@ -84,29 +84,29 @@ export class Exporter {
     public RootFile: string = `ng-package.json`;
     public async WriteAsync(): Promise<any> {
         for (
-            let file_index_ = 0, file_source_ = this.ExistingIndexFiles; file_index_ < file_source_.length; file_index_++) {
-            let file = file_source_[file_index_];
+            let i = 0; i < this.ExistingIndexFiles.length; i++) {
+            const file = this.ExistingIndexFiles[i];
             // Idempotency
             if ((<boolean>(File.Exists(file)))) {
                 File.Delete(file);
             }
         }
         for (
-            let export_index_ = 0, export_source_ = this.Exports; export_index_ < export_source_.length; export_index_++) {
-            let $export = export_source_[export_index_];
+            let i = 0; i < this.Exports.length; i++) {
+            const $export = this.Exports[i];
             await $export.WriteAsync();
         }
     }
     public async ParseAsync(folder: string | null): Promise<any> {
         await this.ParseInternalAsync(folder);
         for (
-            let export_index_ = 0, export_source_ = Enumerable.ToList(this.Exports); export_index_ < export_source_.length; export_index_++) {
-            let $export = export_source_[export_index_];
+            let i = 0; i < this.Exports.length; i++) {
+            const $export = this.Exports[i];
             this.CheckExport($export, folder);
         }
     }
     public CheckExport($export: Export | null, folder: string | null): void {
-        let CanPatch = (path: string | null): boolean => !(<boolean>(this.IsRoot(path)));
+        const CanPatch = (path: string | null): boolean => !(<boolean>(this.IsRoot(path)));
         if (!(<boolean>(CanPatch($export.Folder)))) {
             return;
         }
@@ -114,7 +114,7 @@ export class Exporter {
             return;
         }
         if ((<boolean>((($export.Items).length > 0)))) {
-            let parent = (<string>(Path.GetDirectoryName($export.Folder)));
+            const parent = (<string>(Path.GetDirectoryName($export.Folder)));
             if (parent.length < folder.length) {
                 return;
             }
@@ -124,7 +124,7 @@ export class Exporter {
             if (StringComparer.CompareIgnoreCase(parent, folder)) {
                 return;
             }
-            let parentExport = this.EnsureExport(parent);
+            const parentExport = this.EnsureExport(parent);
             if (!(<boolean>(((parentExport.Items).filter(_ => (<boolean>(StringComparer.CompareIgnoreCase(_.Path, $export.Folder)))).length > 0)))) {
                 parentExport.Items.push(new ExportItem($export.Folder, ExportItemKind.Module));
             }
@@ -156,12 +156,12 @@ export class Exporter {
         if ((<string>((<string>(Path.GetFileName(folder))).toLowerCase())) == `coverage`) {
             return (<boolean>(false));
         }
-        let exports = new Array<ExportItem>();
+        const exports = new Array<ExportItem>();
         if (!(<boolean>(this.IsRoot(folder)))) {
-            let MakeFullPath = (p: string | null): string => (<string>((<string>(Path.Combine(folder, p)))))
+            const MakeFullPath = (p: string | null): string => (<string>((<string>(Path.Combine(folder, p)))))
             for (
                 let i = 0, files = Directory.EnumerateFiles(folder, `*.ts`); i < files.length; i++) {
-                let file = files[i];
+                const file = files[i];
                 if ((<boolean>(this.HasName(file, `index`))) || (<boolean>(this.HasName(file, `public_api`)))) {
                     this.ExistingIndexFiles.push(file);
                     continue;
@@ -169,23 +169,23 @@ export class Exporter {
                 if ((<boolean>((<string>(file.toLowerCase())).endsWith(`.spec.ts`)))) {
                     continue;
                 }
-                let matches = (<boolean>(new RegExp(`export\\s+(declare\\s+){0,1}(abstract\\s+){0,1}(const|type|enum|class|interface|function)\\s+(?<Name>[A-z0-9_]*?)\\s*({|<|\\b|$| |\\()`, `g`).test(await File.ReadAllTextAsync(file))));
+                const matches = (<boolean>(new RegExp(`export\\s+(declare\\s+){0,1}(abstract\\s+){0,1}(const|type|enum|class|interface|function)\\s+(?<Name>[A-z0-9_]*?)\\s*({|<|\\b|$| |\\()`, `g`).test(await File.ReadAllTextAsync(file))));
                 if (matches) {
                     exports.push(new ExportItem((<string>(MakeFullPath((<string>(Path.GetFileName((<string>(Path.GetFileNameWithoutExtension(file))))))))), ExportItemKind.File));
                 }
             }
             for (
                 let i = 0, subFolders = Directory.EnumerateDirectories(folder, `*`); i < subFolders.length; i++) {
-                let subFolder = subFolders[i];
+                const subFolder = subFolders[i];
                 await this.ParseInternalAsync(subFolder);
             }
-            let internalTs = (<string>(Path.Combine(folder, `internal.ts`)));
+            const internalTs = (<string>(Path.Combine(folder, `internal.ts`)));
             if ((<boolean>(File.Exists(internalTs)))) {
-                let internalTsContent = await File.ReadAllTextAsync(internalTs);
-                let matches = Enumerable.Cast((() => {
-                    let r = new RegExp(`from\\s+("|')(?<Name>.*?)("|')`, `g`);
+                const internalTsContent = await File.ReadAllTextAsync(internalTs);
+                const matches = Enumerable.Cast((() => {
+                    const r = new RegExp(`from\\s+("|')(?<Name>.*?)("|')`, `g`);
                     let m = null;
-                    let all = new Array<string>();
+                    const all = new Array<string>();
                     do {
                         m = r.exec(internalTsContent);
                         if (m) {
@@ -197,26 +197,26 @@ export class Exporter {
                 })());
                 for (
                     let i = 0; i < matches.length; i++) {
-                    let m = matches[i];
+                    const m = matches[i];
                     let path = m["groups"][`Name`];
                     path = (<string>(Path.GetFullPath(path, folder)));
                     Enumerable.ToList(exports.filter(_ => (<boolean>(StringComparer.CompareIgnoreCase(_.Path, path))))).forEach(_ => _.Internal = true);
                 }
             }
-            let $export = this.EnsureExport(folder);
-            let rc = (<string>(Path.Combine(folder, `.exportrc.json`)));
+            const $export = this.EnsureExport(folder);
+            const rc = (<string>(Path.Combine(folder, `.exportrc.json`)));
             if ((<boolean>(File.Exists(rc)))) {
-                let exportRc = JSON.parse((<string>(File.ReadAllText(rc)))) as ExportRc;
+                const exportRc = JSON.parse((<string>(File.ReadAllText(rc)))) as ExportRc;
                 if (!(<boolean>(StringUtil.IsNullOrWhiteSpace(exportRc.from)))) {
                     $export.From = (<string>(Path.Combine((<string>(this.FindRoot(folder))), (<string>(StringUtil.TrimStart((<string>(StringUtil.Replace(exportRc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0)))), '\\'.charCodeAt(0)))))));
                 }
             }
             $export.Items.push(...exports);
         } else {
-            let $export = this.EnsureExport(folder);
+            const $export = this.EnsureExport(folder);
             for (
-                let subFolder_index_ = 0, subFolder_source_ = Directory.EnumerateDirectories(folder, `*`); subFolder_index_ < subFolder_source_.length; subFolder_index_++) {
-                let subFolder = subFolder_source_[subFolder_index_];
+                let i = 0, subFolders = Directory.EnumerateDirectories(folder, `*`); i < subFolders.length; i++) {
+                const subFolder = subFolders[i];
                 if (await this.ParseInternalAsync(subFolder)) {
                     $export.Items.push(new ExportItem(subFolder, ExportItemKind.Module));
                 }
@@ -247,12 +247,15 @@ export class Export {
     public From: string;
     public Folder: string;
     public Items: Array<ExportItem> = [];
+    
     constructor(folder: string | null) {
         this.Folder = folder;
     }
+    
     public ToExports(exports: Array<string> | null, makeRelative: boolean): string | null {
         return (<string>((<string>(Enumerable.Select(exports, _ => `export * from \"${(makeRelative ? (<string>(Export.GetRelativePath(_, this.Folder))) : _)}\";`).join(`\n`)))));
     }
+
     public static GetRelativePath(filespec: string | null, folder: string | null): string | null {
         let result = path.relative(folder, filespec);
         while (result.indexOf('\\') !== -1) {
@@ -266,11 +269,12 @@ export class Export {
         }
         return (<string>(result));
     }
+
     public Build($internal: boolean): string | null {
-        let items = Enumerable.ToList(this.Items.filter(_ => _.Internal == $internal || $internal == true));
-        let files = Enumerable.ToList(Enumerable.OrderBy(items.filter(_ => <ExportItemKind>_.Kind == <ExportItemKind>ExportItemKind.File), _ => _.Path));
-        let modules = Enumerable.ToList(Enumerable.OrderBy(items.filter(_ => <ExportItemKind>_.Kind == <ExportItemKind>ExportItemKind.Module), _ => _.Path));
-        let indexTs = new StringBuilder();
+        const items = Enumerable.ToList(this.Items.filter(_ => _.Internal == $internal || $internal == true));
+        const files = Enumerable.ToList(Enumerable.OrderBy(items.filter(_ => <ExportItemKind>_.Kind == <ExportItemKind>ExportItemKind.File), _ => _.Path));
+        const modules = Enumerable.ToList(Enumerable.OrderBy(items.filter(_ => <ExportItemKind>_.Kind == <ExportItemKind>ExportItemKind.Module), _ => _.Path));
+        const indexTs = new StringBuilder();
         if ((<boolean>(((items).length > 0))) || ($internal == true && (<boolean>(((this.Items).filter(_ => _.Internal == false).length > 0))))) {
             if (modules.length > 0) {
                 indexTs.AppendLine(`// Modules`);
@@ -280,18 +284,19 @@ export class Export {
                 indexTs.AppendLine(`// Files`);
                 indexTs.AppendLine((<string>(this.ToExports(Enumerable.Select(files, _ => _.Path), true))));
             }
-            let contents = (<string>((<string>(indexTs.toString())).trim()));
-            return (<string>(`${contents}\n`));
+            const contents = (<string>((<string>(indexTs.toString())).trim()));
+            return this.FinaliseFileContents(contents);
         }
-        return (<string>(null));
+        return null;
     }
+
     public async WriteAsync(): Promise<any> {
         await this.WriteAsyncInternal(`public_api.ts`, (<string>(this.Build(false))));
         await this.WriteAsyncInternal(`index.ts`, (<string>(this.Build(true))));
     }
 
     public async WriteAsyncInternal(path: string | null, content: string | null): Promise<any> {
-        let fullPath = (<string>(Path.Combine(this.Folder, path)));
+        const fullPath = (<string>(Path.Combine(this.Folder, path)));
         if ((<boolean>(StringUtil.IsNullOrWhiteSpace(content)))) {
             return;
         }
@@ -303,10 +308,15 @@ export class Export {
             if (!(<boolean>(Directory.Exists(this.From)))) {
                 Directory.CreateDirectory(this.From);
             }
-            let relativePath = (<string>(StringUtil.Replace((<string>(Path.Combine((<string>(Export.GetRelativePath(this.Folder, this.From))), `public_api`))), '\\'.charCodeAt(0), '/'.charCodeAt(0))));
-            let filePath = (<string>(Path.Combine(this.From, `index.ts`)));
-            await File.WriteAllTextAsync(filePath, (<string>(this.ToExports((<Array<string>>[relativePath]), false))));
+            const relativePath = (<string>(StringUtil.Replace((<string>(Path.Combine((<string>(Export.GetRelativePath(this.Folder, this.From))), `public_api`))), '\\'.charCodeAt(0), '/'.charCodeAt(0))));
+            const filePath = (<string>(Path.Combine(this.From, `index.ts`)));
+            const contents = this.ToExports((<Array<string>>[relativePath]), false);
+            await File.WriteAllTextAsync(filePath, this.FinaliseFileContents(contents));
         }
+    }
+
+    private FinaliseFileContents(contents: string){
+        return `${contents}\n`;
     }
 }
 export class ExportRc {
