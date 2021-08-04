@@ -134,12 +134,12 @@ export class Exporter {
     public EnsureExport(folder: string | null): Export | null {
         let $export = Enumerable.SingleOrDefault(this.Exports, _ => (<boolean>(StringComparer.CompareIgnoreCase(_.Folder, folder))));
         if ($export == <any>null) {
-            $export = new Export(folder);
+            $export = new Export(this, folder);
             this.Exports.push($export);
         }
         return $export;
     }
-    private FindRoot(folder: string | null): string | null {
+    public FindRoot(folder: string | null): string | null {
         let root = folder;
         while (!(<boolean>(this.IsRoot(root)))) {
             root = (<string>(Path.GetDirectoryName(root)));
@@ -207,9 +207,7 @@ export class Exporter {
             const rc = (<string>(Path.Combine(folder, `.exportrc.json`)));
             if ((<boolean>(File.Exists(rc)))) {
                 const exportRc = JSON.parse((<string>(File.ReadAllText(rc)))) as ExportRc;
-                if (!(<boolean>(StringUtil.IsNullOrWhiteSpace(exportRc.from)))) {
-                    $export.From = (<string>(Path.Combine((<string>(this.FindRoot(folder))), (<string>(StringUtil.TrimStart((<string>(StringUtil.Replace(exportRc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0)))), '\\'.charCodeAt(0)))))));
-                }
+                $export.Rc = exportRc;
             }
             $export.Items.push(...exports);
         } else {
@@ -244,16 +242,29 @@ export class ExportItem {
     }
 }
 export class Export {
-    public From: string;
+    public get From(): string {
+        if (!(<boolean>(StringUtil.IsNullOrWhiteSpace(this.Rc.from)))) {
+            return (<string>(Path.Combine((<string>(this.exporter.FindRoot(this.Folder))), (<string>(StringUtil.TrimStart((<string>(StringUtil.Replace(this.Rc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0)))), '\\'.charCodeAt(0)))))));
+        }
+        return null;
+    }
+    public Rc: ExportRc;
     public Folder: string;
     public Items: Array<ExportItem> = [];
-    
-    constructor(folder: string | null) {
+
+    constructor(private exporter: Exporter, folder: string | null) {
         this.Folder = folder;
     }
-    
+
     public ToExports(exports: Array<string> | null, makeRelative: boolean): string | null {
-        return (<string>((<string>(Enumerable.Select(exports, _ => `export * from \"${(makeRelative ? (<string>(Export.GetRelativePath(_, this.Folder))) : _)}\";`).join(`\n`)))));
+        const filtered = exports.slice()
+            .filter(_ => !this.IsExcluded(_));
+        return (<string>((<string>(Enumerable.Select(filtered, _ => `export * from \"${(makeRelative ? (<string>(Export.GetRelativePath(_, this.Folder))) : _)}\";`).join(`\n`)))));
+    }
+
+    private IsExcluded(name: string) {
+        name = path.basename(name);
+        return this.Rc?.exclude?.filter(_ => _.toLowerCase() === name.toLowerCase()).length > 0;
     }
 
     public static GetRelativePath(filespec: string | null, folder: string | null): string | null {
@@ -315,12 +326,13 @@ export class Export {
         }
     }
 
-    private FinaliseFileContents(contents: string){
+    private FinaliseFileContents(contents: string) {
         return `${contents}\n`;
     }
 }
 export class ExportRc {
     public from: string;
+    public exclude: string[];
 }
 export enum ExportItemKind {
     Module,

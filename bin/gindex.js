@@ -136,7 +136,7 @@ export class Exporter {
     EnsureExport(folder) {
         let $export = Enumerable.SingleOrDefault(this.Exports, _ => (StringComparer.CompareIgnoreCase(_.Folder, folder)));
         if ($export == null) {
-            $export = new Export(folder);
+            $export = new Export(this, folder);
             this.Exports.push($export);
         }
         return $export;
@@ -206,9 +206,7 @@ export class Exporter {
                 const rc = (Path.Combine(folder, `.exportrc.json`));
                 if ((File.Exists(rc))) {
                     const exportRc = JSON.parse((File.ReadAllText(rc)));
-                    if (!(StringUtil.IsNullOrWhiteSpace(exportRc.from))) {
-                        $export.From = (Path.Combine((this.FindRoot(folder)), (StringUtil.TrimStart((StringUtil.Replace(exportRc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0))), '\\'.charCodeAt(0)))));
-                    }
+                    $export.Rc = exportRc;
                 }
                 $export.Items.push(...exports);
             }
@@ -243,12 +241,26 @@ export class ExportItem {
     }
 }
 export class Export {
-    constructor(folder) {
+    constructor(exporter, folder) {
+        this.exporter = exporter;
         this.Items = [];
         this.Folder = folder;
     }
+    get From() {
+        if (!(StringUtil.IsNullOrWhiteSpace(this.Rc.from))) {
+            return (Path.Combine((this.exporter.FindRoot(this.Folder)), (StringUtil.TrimStart((StringUtil.Replace(this.Rc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0))), '\\'.charCodeAt(0)))));
+        }
+        return null;
+    }
     ToExports(exports, makeRelative) {
-        return (Enumerable.Select(exports, _ => `export * from \"${(makeRelative ? (Export.GetRelativePath(_, this.Folder)) : _)}\";`).join(`\n`));
+        const filtered = exports.slice()
+            .filter(_ => !this.IsExcluded(_));
+        return (Enumerable.Select(filtered, _ => `export * from \"${(makeRelative ? (Export.GetRelativePath(_, this.Folder)) : _)}\";`).join(`\n`));
+    }
+    IsExcluded(name) {
+        var _a, _b;
+        name = path.basename(name);
+        return ((_b = (_a = this.Rc) === null || _a === void 0 ? void 0 : _a.exclude) === null || _b === void 0 ? void 0 : _b.filter(_ => _.toLowerCase() === name.toLowerCase()).length) > 0;
     }
     static GetRelativePath(filespec, folder) {
         let result = path.relative(folder, filespec);
