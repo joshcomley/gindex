@@ -247,7 +247,8 @@ export class Export {
         this.Folder = folder;
     }
     get From() {
-        if (!(StringUtil.IsNullOrWhiteSpace(this.Rc.from))) {
+        var _a;
+        if (!(StringUtil.IsNullOrWhiteSpace((_a = this.Rc) === null || _a === void 0 ? void 0 : _a.from))) {
             return (Path.Combine((this.exporter.FindRoot(this.Folder)), (StringUtil.TrimStart((StringUtil.Replace(this.Rc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0))), '\\'.charCodeAt(0)))));
         }
         return null;

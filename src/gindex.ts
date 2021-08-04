@@ -243,7 +243,7 @@ export class ExportItem {
 }
 export class Export {
     public get From(): string {
-        if (!(<boolean>(StringUtil.IsNullOrWhiteSpace(this.Rc.from)))) {
+        if (!(<boolean>(StringUtil.IsNullOrWhiteSpace(this.Rc?.from)))) {
             return (<string>(Path.Combine((<string>(this.exporter.FindRoot(this.Folder))), (<string>(StringUtil.TrimStart((<string>(StringUtil.Replace(this.Rc.from, '/'.charCodeAt(0), '\\'.charCodeAt(0)))), '\\'.charCodeAt(0)))))));
         }
         return null;
