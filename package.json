@@ -15,7 +15,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "go": "yarn build & node bin/gindex.js test",
-    "pub": "npm version patch & npm publish"
+    "pub": "yarn build & npm version patch & npm publish"
   },
   "repository": {
     "type": "git",
